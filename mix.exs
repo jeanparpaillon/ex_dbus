@@ -24,13 +24,16 @@ defmodule ExDbus.MixProject do
     ]
   end
 
-  defp elixirc_paths(:dev), do: ["lib", "examples"]
+  # defp elixirc_paths(:dev), do: ["lib", "examples"]
+  defp elixirc_paths(:dev), do: ["lib"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:dbus, "~> 0.8.0"},
+      {:dbus, github: "jeanparpaillon/erlang-dbus", branch: "next"},
+      # {:dbus, "~> 0.8.0"},
       {:saxy, "~> 1.6.0"},
 
       # Development dialyzer
