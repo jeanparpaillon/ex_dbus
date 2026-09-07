@@ -1,0 +1,5 @@
+%{
+  "dialyxir": {:hex, :dialyxir, "1.1.0", "c5aab0d6e71e5522e77beff7ba9e08f8e02bad90dfbeffae60eaf0cb47e29488", [:mix], [{:erlex, ">= 0.2.6", [hex: :erlex, repo: "hexpm", optional: false]}], "hexpm", "07ea8e49c45f15264ebe6d5b93799d4dd56a44036cf42d0ad9c960bc266c0b9a"},
+  "erlex": {:hex, :erlex, "0.2.9", "7debbbaa9f4f368b8cd648983e0f1d7963028508e9c59e9d4ed504e94ef52a55", [:mix], [], "hexpm", "8cfffc0ec7159e6d73de2ab28a588064de80f88b2798d5cbe4482cbbc200178b"},
+  "saxy": {:hex, :saxy, "1.4.0", "c7203ad20001f72eaaad07d08f82be063fa94a40924e6bb39d93d55f979abcba", [:mix], [], "hexpm", "3fe790354d3f2234ad0b5be2d99822a23fa2d4e8ccd6657c672901dac172e9a9"},
+}
