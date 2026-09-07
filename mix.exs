@@ -31,7 +31,7 @@ defmodule ExDbus.MixProject do
   defp deps do
     [
       {:dbus, "~> 0.8.0"},
-      {:saxy, "~> 1.4.0"},
+      {:saxy, "~> 1.6.0"},
 
       # Development dialyzer
       {:dialyxir, "~> 1.1.0", only: [:dev, :test], runtime: false}
