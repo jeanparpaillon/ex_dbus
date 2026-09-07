@@ -46,9 +46,9 @@ defmodule ExDBus.Service do
 
     if cookie == :system_user do
       case fetch_system_uid() do
-        {:ok, ""} -> Logger.warn("Failed to set D-Bus cookie :user : Empty uid")
+        {:ok, ""} -> Logger.warning("Failed to set D-Bus cookie :user : Empty uid")
         {:ok, uid} -> set_dbus_cookie(Base.encode16(uid))
-        {:error, error} -> Logger.warn("Failed to set D-Bus cookie :user : #{inspect(error)}")
+        {:error, error} -> Logger.warning("Failed to set D-Bus cookie :user : #{inspect(error)}")
       end
     else
       # erlang-dbus hardcodes the "1000" uid cookie as default.
@@ -507,7 +507,7 @@ defmodule ExDBus.Service do
     try do
       callback.(args, context)
     rescue
-      e -> {:error, "org.freedesktop.DBus.Error.Failed", e.message}
+      e -> {:error, "org.freedesktop.DBus.Error.Failed", Exception.message(e)}
     else
       return -> return
     end

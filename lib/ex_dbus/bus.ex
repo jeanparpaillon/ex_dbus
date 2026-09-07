@@ -1,6 +1,5 @@
 defmodule ExDBus.Bus do
   use GenServer
-  require Logger
 
   @type bus_pid() :: pid()
   @type bus_id() :: :session | :system
