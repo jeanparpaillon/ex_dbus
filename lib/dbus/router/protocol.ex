@@ -1,6 +1,8 @@
 defprotocol DBus.Router.Protocol do
   alias DBus.Spec
 
+  @fallback_to_any true
+
   @spec method(
           t(),
           path :: String.t(),
@@ -33,4 +35,12 @@ defprotocol DBus.Router.Protocol do
         ) ::
           Spec.property_setter_return() | :skip
   def set_property(router, path, interface, property, value, context)
+end
+
+defimpl DBus.Router.Protocol, for: Any do
+  def method(_router, _path, _interface, _method, _signature, _args, _context), do: :skip
+
+  def get_property(_router, _path, _interface, _property, _context), do: :skip
+
+  def set_property(_router, _path, _interface, _property, _value, _context), do: :skip
 end

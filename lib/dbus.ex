@@ -15,8 +15,10 @@ defmodule DBus do
           | :session
           | binary()
 
-  @spec start_link(address(), [Connection.option()]) :: Supervisor.on_start()
-  def start_link(address, conn_opts \\ []) do
+  @type opt() :: {:auth_ctx, map()}
+
+  @spec start_link(address(), [opt()]) :: Supervisor.on_start()
+  def start_link(address, options \\ []) do
     sup_ref = sup_ref(address)
     conn_ref = conn_ref(address)
     proxy_ref = proxy_ref(address)
@@ -28,7 +30,7 @@ defmodule DBus do
       {:ok, addresses} ->
         connection_args = [
           addresses,
-          [{:server_ref, {:local, conn_ref}}]
+          [{:server_ref, {:local, conn_ref}} | options]
         ]
 
         proxy_args = [conn_ref, {:local, proxy_ref}]
