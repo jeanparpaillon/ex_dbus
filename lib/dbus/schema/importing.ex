@@ -191,7 +191,8 @@ defmodule DBus.Schema.Importing do
       try do
         source_module.__schema__()
       rescue
-        e in UndefinedFunctionError -> raise e
+        e in UndefinedFunctionError ->
+          reraise e, __STACKTRACE__
       end
 
     Tree.find_path!(source_root, path)
