@@ -1,5 +1,5 @@
-defmodule ExDBus.Builder do
-  use ExDBus.Spec, prefix: false
+defmodule DBus.Builder do
+  use DBus.Spec, prefix: false
 
   @spec service(name()) :: {:ok, service()}
   def service(name) do
@@ -88,8 +88,8 @@ defmodule ExDBus.Builder do
     {:ok, signal} = signal(name)
     signal
   rescue
-      _ ->
-        {:error, {:invalid_signal, name}}
+    _ ->
+      {:error, {:invalid_signal, name}}
   end
 
   @spec method(name()) :: {:ok, method()}
@@ -114,7 +114,7 @@ defmodule ExDBus.Builder do
   @spec property!(name(), dbus_type(), access()) :: property()
   def property!(name, type, access) do
     {:ok, property} = property(name, type, access)
-      property
+    property
   end
 
   @spec argument(name(), dbus_type(), direction()) :: {:ok, argument()}

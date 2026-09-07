@@ -1,4 +1,4 @@
-defmodule ExDBus do
+defmodule DBus do
   @moduledoc """
   This module holds the D-Bus proxy.
 

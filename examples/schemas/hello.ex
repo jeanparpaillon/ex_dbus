@@ -1,5 +1,5 @@
 defmodule Examples.Schemas.HelloExample do
-  use ExDBus.Schema
+  use DBus.Schema
 
   node do
     interface "org.example.HelloInterface" do

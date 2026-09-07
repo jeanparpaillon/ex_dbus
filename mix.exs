@@ -1,4 +1,4 @@
-defmodule ExDbus.MixProject do
+defmodule DBus.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/mpotra/ex_dbus"

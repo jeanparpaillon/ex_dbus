@@ -1,5 +1,5 @@
 defmodule DBusTrayIcon.StatusNotifierItem do
-  use ExDBus.Schema
+  use DBus.Schema
 
   node do
     interface "org.kde.StatusNotifierItem" do

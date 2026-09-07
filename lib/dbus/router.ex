@@ -1,5 +1,5 @@
-defmodule ExDBus.Router do
-  alias ExDBus.Spec
+defmodule DBus.Router do
+  alias DBus.Spec
 
   @callback method(
               path :: String.t(),
@@ -28,9 +28,9 @@ defmodule ExDBus.Router do
 
   defmacro __using__(_opts) do
     quote do
-      @behaviour ExDBus.Router
+      @behaviour DBus.Router
 
-      defimpl ExDBus.Router.Protocol, for: __MODULE__ do
+      defimpl DBus.Router.Protocol, for: __MODULE__ do
         def method(_, path, interface, method, signature, args, context) do
           @for.method(path, interface, method, signature, args, context)
         end

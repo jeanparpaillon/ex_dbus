@@ -1,4 +1,4 @@
-defmodule ExDBus.Schema.SchemaException do
+defmodule DBus.Schema.SchemaException do
   import Kernel, except: [reraise: 2]
 
   defexception message: "NodeDefinedException",

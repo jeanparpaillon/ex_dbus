@@ -1,6 +1,6 @@
-defmodule ExDBus.Tree do
-  use ExDBus.Spec, prefix: false
-  alias ExDBus.Builder
+defmodule DBus.Tree do
+  use DBus.Spec, prefix: false
+  alias DBus.Builder
 
   @type find_result(v) :: {:ok, v} | :error
 
@@ -272,7 +272,7 @@ defmodule ExDBus.Tree do
       )
       when is_binary(search_path) do
     {object, result} =
-      ExDBus.Tree.Traverse.traverse(
+      DBus.Tree.Traverse.traverse(
         object,
         {false, nil, []},
         fn

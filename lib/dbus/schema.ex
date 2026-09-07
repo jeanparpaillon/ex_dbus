@@ -1,6 +1,6 @@
-defmodule ExDBus.Schema do
-  alias ExDBus.Schema.Importing
-  alias ExDBus.Builder
+defmodule DBus.Schema do
+  alias DBus.Schema.Importing
+  alias DBus.Builder
 
   defmacro __using__(_) do
     module = __CALLER__.module
@@ -10,9 +10,9 @@ defmodule ExDBus.Schema do
 
     quote do
       import Kernel, except: [node: 0, node: 1]
-      import ExDBus.Schema, only: [node: 0, node: 1, node: 2]
+      import DBus.Schema, only: [node: 0, node: 1, node: 2]
 
-      @before_compile ExDBus.Schema
+      @before_compile DBus.Schema
     end
   end
 

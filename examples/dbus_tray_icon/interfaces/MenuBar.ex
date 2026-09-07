@@ -1,5 +1,5 @@
 defmodule DBusTrayIcon.MenuBar do
-  use ExDBus.Schema
+  use DBus.Schema
 
   node do
     interface "com.canonical.dbusmenu" do

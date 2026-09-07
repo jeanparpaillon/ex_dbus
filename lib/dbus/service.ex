@@ -1,8 +1,9 @@
-defmodule ExDBus.Service do
+defmodule DBus.Service do
   require Logger
   use GenServer
-  alias ExDBus.Tree
-  alias ExDBus.Spec
+  alias DBus.Bus
+  alias DBus.Tree
+  alias DBus.Spec
   alias ErlangDBus.Message
 
   def start_link(opts, gen_opts \\ []) do
@@ -67,7 +68,7 @@ defmodule ExDBus.Service do
               {:ok, state}
 
             error ->
-              ExDBus.Bus.close(bus)
+              Bus.close(bus)
               {:stop, error}
           end
         else
@@ -183,7 +184,7 @@ defmodule ExDBus.Service do
   end
 
   def handle_call(:get_dbus_pid, _from, %{bus: bus} = state) when is_pid(bus) do
-    reply = ExDBus.Bus.get_dbus_pid(bus)
+    reply = DBus.Bus.get_dbus_pid(bus)
     {:reply, reply, state}
   end
 
@@ -464,20 +465,20 @@ defmodule ExDBus.Service do
 
   # @spec register_service(pid(), String.t()) :: {:ok, {pid(), pid()}} | :ignore | {:error, any}
   # def register_service(service_pid, service_name) do
-  #   with {:ok, bus} <- ExDBus.Bus.start_link(:session),
-  #        :ok <- ExDBus.Bus.connect(bus, service_pid),
-  #        :ok <- ExDBus.Bus.register_name(bus, service_name) do
+  #   with {:ok, bus} <- DBus.Bus.start_link(:session),
+  #        :ok <- DBus.Bus.connect(bus, service_pid),
+  #        :ok <- DBus.Bus.register_name(bus, service_name) do
   #     {:ok, {service_pid, bus}}
   #   end
   # end
 
   defp register_name(bus, service_name) do
-    ExDBus.Bus.register_name(bus, service_name)
+    DBus.Bus.register_name(bus, service_name)
   end
 
   defp connect_bus(service_pid) do
-    with {:ok, bus} <- ExDBus.Bus.start_link(:session),
-         :ok <- ExDBus.Bus.connect(bus, service_pid) do
+    with {:ok, bus} <- DBus.Bus.start_link(:session),
+         :ok <- DBus.Bus.connect(bus, service_pid) do
       {:ok, bus}
     end
   end
@@ -488,7 +489,7 @@ defmodule ExDBus.Service do
 
   defp route_method(router, path, interface, method, signature, args, context) do
     try do
-      ExDBus.Router.Protocol.method(router, path, interface, method, signature, args, context)
+      DBus.Router.Protocol.method(router, path, interface, method, signature, args, context)
     rescue
       _e ->
         {:error, "org.freedesktop.DBus.Error.UnknownMethod",

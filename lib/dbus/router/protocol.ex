@@ -1,5 +1,5 @@
-defprotocol ExDBus.Router.Protocol do
-  alias ExDBus.Spec
+defprotocol DBus.Router.Protocol do
+  alias DBus.Spec
 
   @spec method(
           t(),

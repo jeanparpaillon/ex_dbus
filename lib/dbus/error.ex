@@ -1,4 +1,4 @@
-defmodule ExDBus.Error do
+defmodule DBus.Error do
   import Kernel, except: [defexception: 1]
 
   Kernel.defexception([:type])
@@ -15,7 +15,7 @@ defmodule ExDBus.Error do
 
     quote do
       import Kernel, except: [defexception: 1]
-      import ExDBus.Error, only: [defexception: 1]
+      import DBus.Error, only: [defexception: 1]
 
       def get_type() do
         @error_type
@@ -54,13 +54,13 @@ defmodule ExDBus.Error do
   end
 end
 
-defmodule ExDBus.Error.Failed do
-  use ExDBus.Error, type: "org.freedesktop.DBus.Error.Failed"
+defmodule DBus.Error.Failed do
+  use DBus.Error, type: "org.freedesktop.DBus.Error.Failed"
   defexception []
 end
 
-defmodule ExDBus.Error.UnknownObject do
-  use ExDBus.Error, type: "org.freedesktop.DBus.Error.UnknownObject"
+defmodule DBus.Error.UnknownObject do
+  use DBus.Error, type: "org.freedesktop.DBus.Error.UnknownObject"
   defexception path: "/"
 
   @impl true
@@ -69,8 +69,8 @@ defmodule ExDBus.Error.UnknownObject do
   end
 end
 
-defmodule ExDBus.Error.UnknownInterface do
-  use ExDBus.Error, type: "org.freedesktop.DBus.Error.UnknownInterface"
+defmodule DBus.Error.UnknownInterface do
+  use DBus.Error, type: "org.freedesktop.DBus.Error.UnknownInterface"
   defexception [:interface, path: "/"]
 
   @impl true
@@ -79,8 +79,8 @@ defmodule ExDBus.Error.UnknownInterface do
   end
 end
 
-defmodule ExDBus.Error.UnknownSignal do
-  use ExDBus.Error, type: "org.freedesktop.DBus.Error.UnknownSignal"
+defmodule DBus.Error.UnknownSignal do
+  use DBus.Error, type: "org.freedesktop.DBus.Error.UnknownSignal"
   defexception [:interface, :signal, path: "/"]
 
   @impl true
@@ -89,8 +89,8 @@ defmodule ExDBus.Error.UnknownSignal do
   end
 end
 
-defmodule ExDBus.Error.UnknownMethod do
-  use ExDBus.Error, type: "org.freedesktop.DBus.Error.UnknownMethod"
+defmodule DBus.Error.UnknownMethod do
+  use DBus.Error, type: "org.freedesktop.DBus.Error.UnknownMethod"
   defexception [:interface, :method, :signature, path: "/"]
 
   @impl true
@@ -99,8 +99,8 @@ defmodule ExDBus.Error.UnknownMethod do
   end
 end
 
-defmodule ExDBus.Error.UnknownProperty do
-  use ExDBus.Error, type: "org.freedesktop.DBus.Error.UnknownProperty"
+defmodule DBus.Error.UnknownProperty do
+  use DBus.Error, type: "org.freedesktop.DBus.Error.UnknownProperty"
   defexception [:interface, :property, path: "/"]
 
   @impl true

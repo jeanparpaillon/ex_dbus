@@ -1,5 +1,5 @@
-defmodule ExDBus.XML.Saxy do
-  use ExDBus.Spec, prefix: false
+defmodule DBus.XML.Saxy do
+  use DBus.Spec, prefix: false
   import Saxy.XML
 
   @spec to_xml(definition(), keyword()) :: Saxy.XML.element()

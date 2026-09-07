@@ -1,5 +1,5 @@
-defmodule ExDBus.Builder.Finder do
-  use ExDBus.Spec, prefix: false
+defmodule DBus.Builder.Finder do
+  use DBus.Spec, prefix: false
 
   @spec find_index(service(), name() | object()) :: {index(), object() | nil}
   def find_index({:service, _, children}, name) when is_binary(name) do

@@ -1,4 +1,4 @@
-defmodule ExDBus.Connection do
+defmodule DBus.Connection do
   @type dbus_bus_name() :: :system | :session
 
   # def connect(bus_id) do

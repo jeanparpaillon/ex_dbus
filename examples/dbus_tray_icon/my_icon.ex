@@ -1,6 +1,6 @@
 defmodule MyIcon.Config do
   use GenServer
-  # alias ExDBus.Tree
+  # alias DBus.Tree
 
   @impl true
   def init(%{} = props) do
@@ -148,7 +148,7 @@ defmodule MyIcon.Config do
 end
 
 defmodule MyIcon.Router do
-  use ExDBus.Router
+  use DBus.Router
 
   defstruct []
 
@@ -185,7 +185,7 @@ end
 
 defmodule MyIcon do
   use GenServer
-  # require ExDBus.DBusTrayIcon.IconSchema
+  # require DBus.DBusTrayIcon.IconSchema
 
   def register_icon(pid \\ __MODULE__) do
     GenServer.call(pid, :register_icon)
@@ -204,13 +204,13 @@ defmodule MyIcon do
     name = "org.example.MyIcon-#{:os.getpid()}-1"
 
     {:ok, service} =
-      ExDBus.Service.start_link(
+      DBus.Service.start_link(
         name: name,
         schema: DBusTrayIcon.IconSchema,
         router: %MyIcon.Router{}
       )
 
-    bus = ExDBus.Service.get_bus(service)
+    bus = DBus.Service.get_bus(service)
     :ok = can_register(bus)
 
     # pixdata = gen_icon(128, 128)
@@ -348,14 +348,14 @@ defmodule MyIcon do
     children =
       children
       |> Enum.map(fn child ->
-        case ExDBus.Tree.get_tag(child) do
+        case DBus.Tree.get_tag(child) do
           :property ->
             if elem(child, 1) == "Status" do
               child
             else
               child
-              |> ExDBus.Tree.set_property_setter(prop_setter)
-              |> ExDBus.Tree.set_property_getter(prop_getter)
+              |> DBus.Tree.set_property_setter(prop_setter)
+              |> DBus.Tree.set_property_getter(prop_getter)
             end
 
           :method ->
@@ -363,7 +363,7 @@ defmodule MyIcon do
               child
             else
               child
-              |> ExDBus.Tree.set_method_callback(method_callback)
+              |> DBus.Tree.set_method_callback(method_callback)
             end
 
           _ ->

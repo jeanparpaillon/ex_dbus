@@ -1,21 +1,21 @@
 defmodule DBusTrayIcon.IconSchema do
-  use ExDBus.Schema
+  use DBus.Schema
 
   node do
     node "/MenuBar" do
-      import from(ExDBus.Interfaces)
+      import from(DBus.Interfaces)
       import from(DBusTrayIcon.MenuBar)
     end
 
-    import from(ExDBus.Interfaces)
+    import from(DBus.Interfaces)
 
     node "/StatusNotifierItem" do
-      import from(ExDBus.Interfaces)
+      import from(DBus.Interfaces)
       import from(DBusTrayIcon.StatusNotifierItem)
     end
 
     node "/Hello" do
-      import from(ExDBus.Interfaces)
+      import from(DBus.Interfaces)
 
       interface "org.example.Hello" do
         property("Name", "s", :read) do

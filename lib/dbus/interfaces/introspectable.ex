@@ -1,5 +1,5 @@
-defmodule ExDBus.Interfaces.Introspectable do
-  use ExDBus.Schema
+defmodule DBus.Interfaces.Introspectable do
+  use DBus.Schema
 
   node do
     interface "org.freedesktop.DBus.Introspectable" do
@@ -17,13 +17,13 @@ defmodule ExDBus.Interfaces.Introspectable do
       |> Enum.map(fn {:object, name, _} -> {:object, name, []} end)
 
     root = {:object, "", children}
-    xml_body = ExDBus.XML.to_xml(root, nested_objects: false)
+    xml_body = DBus.XML.to_xml(root, nested_objects: false)
     {:ok, [:string], [xml_body]}
   end
 
   def introspect(_, %{node: {:object, _, children}}) do
     root = {:object, "", children}
-    xml_body = ExDBus.XML.to_xml(root)
+    xml_body = DBus.XML.to_xml(root)
     {:ok, [:string], [xml_body]}
   end
 

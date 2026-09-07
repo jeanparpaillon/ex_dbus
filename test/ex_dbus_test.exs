@@ -1,8 +1,8 @@
-defmodule ExDbusTest do
+defmodule DBusTest do
   use ExUnit.Case
-  doctest ExDbus
+  doctest DBus
 
   test "greets the world" do
-    assert ExDbus.hello() == :world
+    assert DBus.hello() == :world
   end
 end

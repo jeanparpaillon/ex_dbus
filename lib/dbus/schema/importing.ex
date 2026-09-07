@@ -1,4 +1,4 @@
-defmodule ExDBus.Schema.Importing do
+defmodule DBus.Schema.Importing do
   @moduledoc """
 
 
@@ -65,7 +65,7 @@ defmodule ExDBus.Schema.Importing do
   {:reference, name, {schema, path, {:object, object_name}}}
   {:reference, name, {schema, path, {:interface, interface_name}}}
   """
-  alias ExDBus.Builder
+  alias DBus.Builder
 
   def parse_node({:import, _meta, [[do: _block]]} = ast, _parent, _caller) do
     ast
@@ -159,8 +159,8 @@ defmodule ExDBus.Schema.Importing do
 
   defp import_interface_from_source(node, path, find_name, as_name, parent, caller) do
     node
-    |> ExDBus.Tree.find_path!(path)
-    |> ExDBus.Tree.find_interface(find_name)
+    |> DBus.Tree.find_path!(path)
+    |> DBus.Tree.find_interface(find_name)
     |> case do
       {:ok, {:interface, _, children}} -> [{:interface, as_name, children}]
       _ -> []
@@ -171,7 +171,7 @@ defmodule ExDBus.Schema.Importing do
   defp import_from_source(source, path, parent, caller) do
     source
     |> get_source_path_node(path, caller)
-    |> ExDBus.Tree.children()
+    |> DBus.Tree.children()
     |> build_import_block(parent, caller)
   end
 
@@ -193,11 +193,11 @@ defmodule ExDBus.Schema.Importing do
         e in UndefinedFunctionError -> raise e
       end
 
-    ExDBus.Tree.find_path!(source_root, path)
+    DBus.Tree.find_path!(source_root, path)
   end
 
   defp build_import_block(children, parent, _caller) do
-    # object = Macro.var(:object, ExDBus.Schema)
+    # object = Macro.var(:object, DBus.Schema)
 
     block =
       children

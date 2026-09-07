@@ -4,7 +4,7 @@ defmodule ErlangDBus.Message do
   @type dbus_header() ::
           {:dbus_header, integer, integer, integer, integer, integer, :undefined | integer, list}
   @type dbus_message() :: {:dbus_message, dbus_header(), any}
-  @type dbus_error() :: ExDBus.Spec.dbus_reply_error()
+  @type dbus_error() :: DBus.Spec.dbus_reply_error()
   @type field() ::
           :destination
           | :error_name

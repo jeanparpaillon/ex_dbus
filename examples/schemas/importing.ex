@@ -1,7 +1,7 @@
 defmodule Examples.Schemas.Importing do
-  use ExDBus.Schema
+  use DBus.Schema
   alias Examples.Schemas.HelloExample
-  alias ExDBus.Interfaces.Introspectable
+  alias DBus.Interfaces.Introspectable
 
   node do
     import from(HelloExample)
@@ -29,7 +29,6 @@ defmodule Examples.Schemas.Importing do
       interface("org.example.ElementInterface", path: "/Element")
       # interface("org.example.ElementInterface", path: "/Element", as: "MyElementInterface")
     end
-
 
     interface "org.example.MyInterface" do
       property("Category", "s", :read)

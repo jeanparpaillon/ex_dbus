@@ -1,19 +1,22 @@
 defmodule Examples.Schemas.Example1 do
-  use ExDBus.Schema
+  use DBus.Schema
 
   node do
     interface "org.example.MyWindowInterface" do
       property("Title", "s", :read)
+
       property("WindowId", "i", :read) do
         annotation("org.example.SomeInterface", "some value")
       end
+
       property("Description", "s", :readwrite)
 
       method "SetTitle" do
-       arg("new_title", "s", :in)
+        arg("new_title", "s", :in)
       end
 
       signal("NewTitle")
+
       signal "NewStatus" do
         arg("status", "s")
       end

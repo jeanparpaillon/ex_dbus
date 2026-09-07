@@ -1,4 +1,4 @@
-defmodule ExDBus.Types do
+defmodule DBus.Types do
   @type basic_type ::
           :byte
           | :boolean

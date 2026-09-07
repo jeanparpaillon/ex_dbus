@@ -1,6 +1,6 @@
-defmodule ExDBus.Interfaces.Properties do
-  use ExDBus.Schema
-  alias ExDBus.Tree
+defmodule DBus.Interfaces.Properties do
+  use DBus.Schema
+  alias DBus.Tree
 
   node do
     interface "org.freedesktop.DBus.Properties" do
@@ -158,7 +158,7 @@ defmodule ExDBus.Interfaces.Properties do
        )
        when not is_nil(router) do
     try do
-      ExDBus.Router.Protocol.get_property(router, path, interface_name, property_name, context)
+      DBus.Router.Protocol.get_property(router, path, interface_name, property_name, context)
     rescue
       _error ->
         {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
@@ -234,7 +234,7 @@ defmodule ExDBus.Interfaces.Properties do
        )
        when not is_nil(router) do
     try do
-      ExDBus.Router.Protocol.set_property(
+      DBus.Router.Protocol.set_property(
         router,
         path,
         interface_name,
