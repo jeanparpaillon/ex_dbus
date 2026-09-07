@@ -1,6 +1,6 @@
 defmodule DBus.Schema do
   alias DBus.Schema.Importing
-  alias DBus.Builder
+  alias DBus.DOM.Builder
 
   defmacro __using__(_) do
     module = __CALLER__.module

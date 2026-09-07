@@ -1,5 +1,5 @@
-defmodule DBus.Builder.Reverse do
-  use DBus.Spec, prefix: false
+defmodule DBus.DOM.Builder.Reverse do
+  use DBus.DOM.Spec, prefix: false
 
   @spec reverse(service()) :: service()
   def reverse({:service, name, children}) do

@@ -65,7 +65,8 @@ defmodule DBus.Schema.Importing do
   {:reference, name, {schema, path, {:object, object_name}}}
   {:reference, name, {schema, path, {:interface, interface_name}}}
   """
-  alias DBus.Builder
+  alias DBus.DOM.Builder
+  alias DBus.DOM.Tree
 
   def parse_node({:import, _meta, [[do: _block]]} = ast, _parent, _caller) do
     ast
@@ -159,8 +160,8 @@ defmodule DBus.Schema.Importing do
 
   defp import_interface_from_source(node, path, find_name, as_name, parent, caller) do
     node
-    |> DBus.Tree.find_path!(path)
-    |> DBus.Tree.find_interface(find_name)
+    |> Tree.find_path!(path)
+    |> Tree.find_interface(find_name)
     |> case do
       {:ok, {:interface, _, children}} -> [{:interface, as_name, children}]
       _ -> []
@@ -171,7 +172,7 @@ defmodule DBus.Schema.Importing do
   defp import_from_source(source, path, parent, caller) do
     source
     |> get_source_path_node(path, caller)
-    |> DBus.Tree.children()
+    |> Tree.children()
     |> build_import_block(parent, caller)
   end
 
@@ -193,7 +194,7 @@ defmodule DBus.Schema.Importing do
         e in UndefinedFunctionError -> raise e
       end
 
-    DBus.Tree.find_path!(source_root, path)
+    Tree.find_path!(source_root, path)
   end
 
   defp build_import_block(children, parent, _caller) do

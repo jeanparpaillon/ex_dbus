@@ -1,5 +1,5 @@
-defmodule DBus.Builder do
-  use DBus.Spec, prefix: false
+defmodule DBus.DOM.Builder do
+  use DBus.DOM.Spec, prefix: false
 
   @spec service(name()) :: {:ok, service()}
   def service(name) do

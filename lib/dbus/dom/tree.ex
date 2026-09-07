@@ -1,6 +1,7 @@
-defmodule DBus.Tree do
-  use DBus.Spec, prefix: false
-  alias DBus.Builder
+defmodule DBus.DOM.Tree do
+  use DBus.DOM.Spec, prefix: false
+  alias DBus.DOM.Builder.Finder
+  alias DBus.DOM.Tree.Traverse
 
   @type find_result(v) :: {:ok, v} | :error
 
@@ -249,7 +250,7 @@ defmodule DBus.Tree do
         {:interface, _, _} = interface
       )
       when is_binary(interface_name) do
-    case Builder.Finder.find_index(object, {:interface, interface_name, []}) do
+    case Finder.find_index(object, {:interface, interface_name, []}) do
       {-1, _} ->
         :error
 
@@ -272,7 +273,7 @@ defmodule DBus.Tree do
       )
       when is_binary(search_path) do
     {object, result} =
-      DBus.Tree.Traverse.traverse(
+      Traverse.traverse(
         object,
         {false, nil, []},
         fn
@@ -323,7 +324,7 @@ defmodule DBus.Tree do
   end
 
   def find_method(interface, method, signature) do
-    Builder.Finder.find_method(interface, method, signature)
+    Finder.find_method(interface, method, signature)
   end
 
   @spec get_method_callback(method()) :: :error | nil | {:ok, method_handle()}
@@ -355,7 +356,7 @@ defmodule DBus.Tree do
   # Property function
   @spec find_property(interface(), String.t()) :: find_result(property())
   def find_property({:interface, _, _} = interface, property_name) do
-    Builder.Finder.find(interface, {:property, property_name, nil, :readwrite, [], nil})
+    Finder.find(interface, {:property, property_name, nil, :readwrite, [], nil})
   end
 
   def get_properties({:interface, _, members}) do

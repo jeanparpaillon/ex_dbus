@@ -1,9 +1,9 @@
-defmodule DBus.Tree.Traverse do
+defmodule DBus.DOM.Tree.Traverse do
   @moduledoc """
   Tree traversal functions.
   Blatanly copied and adjusted from Elixir's Macro module.
   """
-  use DBus.Spec, prefix: false
+  use DBus.DOM.Spec, prefix: false
 
   @doc """
   Performs a depth-first traversal of definitions

@@ -13,7 +13,11 @@ defmodule DBus.MixProject do
       source_url: @source_url,
       description: "Elixir implementation of D-Bus",
       package: package(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_local_path: "priv/plts",
+        plt_core_path: "priv/plts"
+      ]
     ]
   end
 
@@ -36,8 +40,9 @@ defmodule DBus.MixProject do
       # {:dbus, "~> 0.8.0"},
       {:saxy, "~> 1.6.0"},
 
-      # Development dialyzer
-      {:dialyxir, "~> 1.4.0", only: [:dev, :test], runtime: false}
+      # Development
+      {:dialyxir, "~> 1.4.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 

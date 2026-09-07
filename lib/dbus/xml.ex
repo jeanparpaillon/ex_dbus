@@ -1,12 +1,13 @@
 defmodule DBus.XML do
-  use DBus.Spec, prefix: false
+  use DBus.DOM.Spec, prefix: false
+  alias DBus.DOM
 
   @doctype "<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\" \"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\">"
 
   @spec to_xml(definition(), keyword()) :: binary()
   def to_xml(definition, opts \\ []) do
     definition
-    |> DBus.XML.Saxy.to_xml(opts)
+    |> DOM.XML.to_xml(opts)
     |> Saxy.encode!(encoding: :utf8)
     |> inject_doctype()
   end

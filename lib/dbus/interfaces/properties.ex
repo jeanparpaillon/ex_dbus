@@ -1,6 +1,6 @@
 defmodule DBus.Interfaces.Properties do
   use DBus.Schema
-  alias DBus.Tree
+  alias DBus.DOM.Tree
 
   node do
     interface "org.freedesktop.DBus.Properties" do

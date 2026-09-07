@@ -1,4 +1,4 @@
-defmodule DBus.Spec do
+defmodule DBus.DOM.Spec do
   @type name() :: String.t()
   @type dbus_type() :: any()
   @type dbus_reply_error() :: {:error, binary(), binary()}
@@ -63,7 +63,7 @@ defmodule DBus.Spec do
   defmacro __using__(opts) do
     if Keyword.get(opts, :prefix, true) do
       quote do
-        alias DBus.Spec
+        alias DBus.DOM.Spec
 
         @type spec_index() :: Spec.index()
         @type spec_name() :: Spec.name()
@@ -97,7 +97,7 @@ defmodule DBus.Spec do
       end
     else
       quote do
-        alias DBus.Spec
+        alias DBus.DOM.Spec
 
         @type index() :: Spec.index()
         @type name() :: Spec.name()

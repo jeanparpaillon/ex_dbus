@@ -1,6 +1,6 @@
-defmodule DBus.Builder.Insert do
-  use DBus.Spec, prefix: false
-  alias DBus.Builder.Finder
+defmodule DBus.DOM.Builder.Insert do
+  use DBus.DOM.Spec, prefix: false
+  alias DBus.DOM.Builder.Finder
 
   @spec insert!(service(), object()) :: service()
   @spec insert!(object(), object() | interface()) :: object()
