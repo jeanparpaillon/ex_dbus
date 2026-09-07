@@ -1,60 +1,60 @@
 defmodule ExDBus.Builder do
   use ExDBus.Spec, prefix: false
 
-  @spec service(name()) :: {:ok, service()} | {:error, binary()}
+  @spec service(name()) :: {:ok, service()}
   def service(name) do
     {:ok, {:service, name, []}}
   end
 
   @spec service!(name()) :: service()
   def service!(name) do
-    with {:ok, service} <- service(name) do
-      service
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, service} = service(name)
+    service
+  rescue
+    _ ->
+      {:error, {:invalid_service, name}}
   end
 
-  @spec root(name()) :: {:ok, object()} | {:error, binary()}
+  @spec root(name()) :: {:ok, object()}
   def root(name \\ "/") do
     object(name)
   end
 
   @spec root!(name()) :: object()
   def root!(name \\ "/") do
-    with {:ok, object} <- root(name) do
-      object
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, object} = root(name)
+    object
+  rescue
+    _ ->
+      {:error, {:invalid_object, name}}
   end
 
-  @spec object(name) :: {:ok, object()} | {:error, binary()}
+  @spec object(name) :: {:ok, object()}
   def object(name) when is_binary(name) do
     {:ok, {:object, name, []}}
   end
 
   @spec object!(name) :: object()
   def object!(name) do
-    with {:ok, object} <- object(name) do
-      object
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, object} = object(name)
+    object
+  rescue
+    _ ->
+      {:error, {:invalid_object, name}}
   end
 
-  @spec interface(name) :: {:ok, interface()} | {:error, binary()}
+  @spec interface(name) :: {:ok, interface()}
   def interface(name) when is_binary(name) do
     {:ok, {:interface, name, []}}
   end
 
   @spec interface!(name) :: interface()
   def interface!(name) do
-    with {:ok, interface} <- interface(name) do
-      interface
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, interface} = interface(name)
+    interface
+  rescue
+    _ ->
+      {:error, {:invalid_interface, name}}
   end
 
   @spec annotation(name, binary() | number() | boolean()) ::
@@ -71,25 +71,25 @@ defmodule ExDBus.Builder do
 
   @spec annotation!(name(), binary() | number() | boolean()) :: annotation()
   def annotation!(name, value \\ true) do
-    with {:ok, annotation} <- annotation(name, value) do
-      annotation
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, annotation} = annotation(name, value)
+    annotation
+  rescue
+    _ ->
+      {:error, {:invalid_annotation, name}}
   end
 
-  @spec signal(name) :: {:ok, signal()} | {:error, binary()}
+  @spec signal(name) :: {:ok, signal()}
   def signal(name) when is_binary(name) do
     {:ok, {:signal, name, []}}
   end
 
   @spec signal!(name) :: signal()
   def signal!(name) do
-    with {:ok, signal} <- signal(name) do
-      signal
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, signal} = signal(name)
+    signal
+  rescue
+      _ ->
+        {:error, {:invalid_signal, name}}
   end
 
   @spec method(name()) :: {:ok, method()}
@@ -99,39 +99,33 @@ defmodule ExDBus.Builder do
 
   @spec method!(name()) :: method()
   def method!(name) do
-    with {:ok, method} <- method(name) do
-      method
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, method} = method(name)
+    method
+  rescue
+    _ ->
+      {:error, {:invalid_method, name}}
   end
 
-  @spec property(name(), dbus_type(), access()) :: {:ok, property()} | {:error, binary()}
+  @spec property(name(), dbus_type(), access()) :: {:ok, property()}
   def property(name, type, access) do
     {:ok, {:property, name, type, access, [], {nil, nil}}}
   end
 
   @spec property!(name(), dbus_type(), access()) :: property()
   def property!(name, type, access) do
-    with {:ok, property} <- property(name, type, access) do
+    {:ok, property} = property(name, type, access)
       property
-    else
-      {:error, reason} -> raise reason
-    end
   end
 
-  @spec argument(name(), dbus_type(), direction()) :: {:ok, argument()} | {:error, binary()}
+  @spec argument(name(), dbus_type(), direction()) :: {:ok, argument()}
   def argument(name, type, direction \\ :out) do
     {:ok, {:argument, name, type, direction, []}}
   end
 
   @spec argument!(name(), dbus_type(), direction()) :: argument()
   def argument!(name, type, direction \\ :out) do
-    with {:ok, argument} <- argument(name, type, direction) do
-      argument
-    else
-      {:error, reason} -> raise reason
-    end
+    {:ok, argument} = argument(name, type, direction)
+    argument
   end
 
   @spec set_method_callback!(method(), method_handle()) :: method()
