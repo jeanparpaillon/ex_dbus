@@ -9,6 +9,7 @@ defmodule DBus.Bus do
   alias DBus.Connection
   alias DBus.Message
   alias DBus.Proxy
+  alias DBus.RPC
 
   defmodule State do
     @moduledoc false
@@ -36,7 +37,7 @@ defmodule DBus.Bus do
         destination: @destination
       )
 
-    case :dbus_rpc.call(conn, hello) do
+    case RPC.call(conn, hello) do
       {:ok, name} when is_binary(name) ->
         Logger.info("Acquired bus name #{name}")
         {:ok, %State{conn: conn, unique_name: name}}
