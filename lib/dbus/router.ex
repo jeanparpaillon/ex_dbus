@@ -49,12 +49,12 @@ defmodule DBus.Router do
   end
 
   defmacro __before_compile__(env) do
-    unless Module.defines?(env.module, {:__struct__, 0}) do
+    if Module.defines?(env.module, {:__struct__, 0}) do
       quote do
-        defstruct []
       end
     else
       quote do
+        defstruct []
       end
     end
   end

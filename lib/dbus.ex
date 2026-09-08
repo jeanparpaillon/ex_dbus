@@ -17,6 +17,13 @@ defmodule DBus do
 
   @type opt() :: {:auth_ctx, map()}
 
+  def child_spec(args) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, args}
+    }
+  end
+
   @spec start_link(address(), [opt()]) :: Supervisor.on_start()
   def start_link(address, options \\ []) do
     sup_ref = sup_ref(address)

@@ -25,22 +25,27 @@ defmodule DBus.Proxy do
 
       defoverridable child_spec: 1
 
+      @impl true
       def handle_dbus_method_call(_message, state) do
         {:noreply, state}
       end
 
+      @impl true
       def handle_dbus_method_return(_message, state) do
         {:noreply, state}
       end
 
+      @impl true
       def handle_dbus_signal(_message, state) do
         {:noreply, state}
       end
 
+      @impl true
       def handle_dbus_error(_message, state) do
         {:noreply, state}
       end
 
+      @impl true
       def handle_call(_call, _from, state) do
         {:noreply, state}
       end
@@ -50,6 +55,10 @@ defmodule DBus.Proxy do
                      handle_dbus_signal: 2,
                      handle_dbus_error: 2,
                      handle_call: 3
+
+      def get_conn(proxy) do
+        :dbus_proxy.get_conn(proxy)
+      end
     end
   end
 
@@ -62,6 +71,8 @@ defmodule DBus.Proxy do
   defdelegate rpc_call(proxy, call), to: :dbus_proxy
 
   defdelegate rpc_call(proxy, call, timeout), to: :dbus_proxy
+
+  defdelegate get_conn(proxy), to: :dbus_proxy
 
   defdelegate stop(proxy), to: :dbus_proxy
 end
