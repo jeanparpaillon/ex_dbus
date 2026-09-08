@@ -66,9 +66,9 @@ defmodule DBus.DOM.Tree do
   end
 
   def find_child_object({:object, _, _} = parent, [name | paths] = path) do
-    with {:ok, child} <- find_child_object(parent, join_path(path)) do
-      {:ok, child}
-    else
+    case find_child_object(parent, join_path(path)) do
+      {:ok, child} ->
+          {:ok, child}
       _ ->
         case find_child_object(parent, name) do
           {:ok, child} -> find_child_object(child, paths)
@@ -106,9 +106,9 @@ defmodule DBus.DOM.Tree do
   end
 
   def find_object(objects, [name | tail] = path) when is_list(objects) do
-    with {:ok, object} <- find_object(objects, join_path(path)) do
-      {:ok, object}
-    else
+    case find_object(objects, join_path(path)) do
+      {:ok, object} ->
+        {:ok, object}
       _ ->
         case find_object(objects, name) do
           {:ok, object} ->
