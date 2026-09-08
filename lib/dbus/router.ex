@@ -30,6 +30,8 @@ defmodule DBus.Router do
     quote do
       @behaviour DBus.Router
 
+      @before_compile DBus.Router
+
       defimpl DBus.Router.Protocol, for: __MODULE__ do
         def method(_, path, interface, method, signature, args, context) do
           @for.method(path, interface, method, signature, args, context)
@@ -42,6 +44,17 @@ defmodule DBus.Router do
         def set_property(_, path, interface, property, value, context) do
           @for.set_property(path, interface, property, value, context)
         end
+      end
+    end
+  end
+
+  defmacro __before_compile__(env) do
+    unless Module.defines?(env.module, {:__struct__, 0}) do
+      quote do
+        defstruct []
+      end
+    else
+      quote do
       end
     end
   end
