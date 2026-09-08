@@ -6,8 +6,8 @@ defmodule DBus do
   with the bus.
   """
   alias :dbus_address, as: Address
-  alias :dbus_bus, as: Bus
-  alias :dbus_connection, as: Connection
+  alias DBus.Bus
+  alias DBus.Connection
 
   # Bus address, for instance from DBUS_SYSTEM_BUS env var
   @type address() ::
@@ -33,20 +33,16 @@ defmodule DBus do
           [{:server_ref, {:local, conn_ref}} | options]
         ]
 
-        proxy_args = [conn_ref, {:local, proxy_ref}]
+        proxy_args = [nil, conn_ref, {:local, proxy_ref}]
 
-        children = [
-          %{
-            id: :dbus_connection,
-            start: {Connection, :start_link, connection_args}
-          },
-          %{
-            id: :dbus_bus,
-            start: {Bus, :start_link, proxy_args}
-          }
-        ]
-
-        Supervisor.start_link(children, strategy: :rest_for_one, name: sup_ref)
+        Supervisor.start_link(
+          [
+            {Connection, connection_args},
+            {Bus, proxy_args}
+          ],
+          strategy: :rest_for_one,
+          name: sup_ref
+        )
 
       {:error, reason} ->
         {:error, reason}

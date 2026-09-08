@@ -1,10 +1,26 @@
 defmodule DBus.Connection do
-  @moduledoc false
-  @type dbus_bus_name() :: :system | :session
+  @moduledoc """
+  Elixir facility that delegates to :dbus_connection
+  """
 
-  # def connect(bus_id) do
-  # end
+  @type connection :: GenServer.on_start()
 
-  # def connect(bus_id, service_id) do
-  # end
+  def child_spec(opts) do
+    %{
+      id: DBus.Connection,
+      start: {DBus.Connection, :start_link, opts}
+    }
+  end
+
+  defdelegate start_link(addresses), to: :dbus_connection
+
+  defdelegate start_link(addresses, options), to: :dbus_connection
+
+  defdelegate stop(conn), to: :dbus_connection
+
+  defdelegate get_guid(conn), to: :dbus_connection
+
+  defdelegate subscribe(conn), to: :dbus_connection
+
+  defdelegate send(conn, message), to: :dbus_connection
 end

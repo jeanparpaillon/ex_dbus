@@ -1,8 +1,14 @@
-# credo:disable-for-this-file Credo.Check.Refactor.Nesting
 defmodule DBus.Interfaces.Properties do
   @moduledoc false
   use DBus.Schema
   alias DBus.DOM.Tree
+
+  @interface "org.freedesktop.DBus.Properties"
+
+  @timeout_error "org.freedesktop.DBus.Error.NoReply"
+  @failed_error "org.freedesktop.DBus.Error.Failed"
+  @unsupported_error "org.freedesktop.DBus.Error.NotSupported"
+  @invalid_args_error "org.freedesktop.DBus.Error.InvalidArgs"
 
   node do
     interface "org.freedesktop.DBus.Properties" do
@@ -34,65 +40,122 @@ defmodule DBus.Interfaces.Properties do
     end
   end
 
+  @doc """
+  Forward `GetAll` to the object the context points at, as a single call.
+
+  The local tree stays the contract: the reply is narrowed to the properties
+  this node declares readable, so a peer that answers with more than we
+  introspect does not widen the interface behind the schema's back.
+  """
   def get_all(interface_name, %{node: object} = context) do
-    with {:ok, interface} <- find_interface(object, interface_name) do
-      context = Map.merge(context, %{interface: interface})
-
-      values =
-        interface
-        |> Tree.get_properties()
-        |> Enum.map(fn property ->
-          name = Tree.property_name(property)
-
-          case can_read(property) do
-            {:ok, getter} -> {true, name, getter, property}
-            _ -> {false, name, nil}
-          end
-        end)
-        |> Enum.filter(&elem(&1, 0))
-        |> Enum.reduce([], fn {_, name, getter, property}, values ->
-          case call_getter(getter, interface_name, name, property, context) do
-            {:ok, [reply_type], [value]} ->
-              value = {:dbus_variant, reply_type, value}
-              [{name, value} | values]
-
-            _ ->
-              values
-          end
-        end)
-
-      {:ok, [{:dict, :string, :variant}], [values]}
+    with {:ok, interface} <- find_interface(object, interface_name),
+         {:ok, values} <- rpc_call("GetAll", {[:string], [interface_name]}, context) do
+      {:ok, [{:dict, :string, :variant}], [readable(interface, values)]}
     end
   end
 
   def get({interface_name, property_name}, %{node: object} = context) do
     with {:ok, interface} <- find_interface(object, interface_name),
          {:ok, property} <- find_property(interface, property_name),
-         {:ok, getter} <- can_read(property) do
-      context =
-        Map.merge(context, %{
-          property: property,
-          interface: interface
-        })
-
-      case call_getter(getter, interface_name, property_name, property, context) do
-        {:ok, [type], [value]} ->
-          {:ok, [:variant], [{:dbus_variant, type, value}]}
-
-        other ->
-          other
-      end
+         :ok <- can_read(property),
+         args = {[:string, :string], [interface_name, property_name]},
+         {:ok, value} <- rpc_call("Get", args, context) do
+      cast_variant(value, property_name)
     end
   end
 
   def set({interface_name, property_name, value}, %{node: object} = context) do
     with {:ok, interface} <- find_interface(object, interface_name),
          {:ok, property} <- find_property(interface, property_name),
-         {:ok, setter} <- can_write(property) do
-      context = Map.merge(context, %{property: property, interface: interface})
-      call_setter(setter, interface_name, property_name, value, property, context)
+         :ok <- can_write(property),
+         args = set_args(interface_name, property_name, value, property),
+         {:ok, _} <- rpc_call("Set", args, context) do
+      # `Set` declares no out argument: the reply carries nothing.
+      {:ok, [], []}
     end
   end
+
+  defp set_args(interface_name, property_name, value, property) do
+    {[:string, :string, :variant], [interface_name, property_name, variant(value, property)]}
+  end
+
+  #
+  # RPC
+  #
+
+  # The destination and the object path come from the call context, not from
+  # the property: a node is a proxy for one remote object, so every property on
+  # it is read from the same peer.
+  defp rpc_call(member, args, %{path: path, destination: destination} = context)
+       when is_binary(path) and is_binary(destination) do
+    message =
+      :dbus_method_call.build(member, path, args,
+        interface: @interface,
+        destination: destination
+      )
+
+    context
+    |> rpc(message)
+    |> cast_reply()
+  rescue
+    e ->
+      {:error, @failed_error, Exception.message(e)}
+  catch
+    :exit, reason ->
+      {:error, @timeout_error, inspect(reason)}
+  end
+
+  defp rpc_call(_member, _args, _context) do
+    {:error, @unsupported_error,
+     "Property access needs a :destination and a :path in the call context"}
+  end
+
+  # A node is backed either by a `dbus_proxy` -- which resolves its own
+  # connection, and is what a node built on the erlang-dbus proxy behaviour
+  # carries -- or by a bare connection. `dbus_proxy:rpc_call/2` runs
+  # `dbus_rpc:call/2` in *this* process, and the connection routes a reply to
+  # whichever process sent the call, so neither form blocks the proxy loop.
+  defp rpc(%{proxy: proxy}, message) when not is_nil(proxy) do
+    :dbus_proxy.rpc_call(proxy, message)
+  end
+
+  defp rpc(%{conn: conn}, message) when not is_nil(conn) do
+    :dbus_rpc.call(conn, message)
+  end
+
+  defp rpc(_context, _message) do
+    {:error, :no_transport}
+  end
+
+  defp cast_reply({:ok, body}), do: {:ok, body}
+
+  # `dbus_error:cast/1` gives the error name alone when the peer sent no
+  # message body.
+  defp cast_reply({:error, {name, message}}) when is_binary(name) and is_binary(message) do
+    {:error, name, message}
+  end
+
+  defp cast_reply({:error, name}) when is_binary(name), do: {:error, name, ""}
+
+  defp cast_reply({:error, :timeout}), do: {:error, @timeout_error, "The peer did not reply"}
+
+  defp cast_reply({:error, :no_transport}) do
+    {:error, @unsupported_error, "Property access needs a :proxy or a :conn in the call context"}
+  end
+
+  defp cast_reply({:error, reason}), do: {:error, @failed_error, inspect(reason)}
+
+  defp cast_variant({:dbus_variant, _, _} = value, _property_name) do
+    {:ok, [:variant], [value]}
+  end
+
+  defp cast_variant(_value, property_name) do
+    {:error, @invalid_args_error, "Property #{property_name} was not answered with a variant"}
+  end
+
+  #
+  # Tree lookups
+  #
 
   defp find_interface(object, interface) do
     case Tree.find_interface(object, interface) do
@@ -116,154 +179,30 @@ defmodule DBus.Interfaces.Properties do
     end
   end
 
-  defp call_getter({:call, pid, method_name}, interface_name, property_name, property, context) do
-    getter = fn property_name ->
-      GenServer.call(pid, {method_name, property_name})
-    end
-
-    call_getter(getter, interface_name, property_name, property, context)
+  # An incoming `a{sv}` unmarshals to a map; a list of pairs is accepted too,
+  # since that is what the marshaller takes on the way out.
+  defp readable(interface, values) when is_map(values) do
+    Map.take(values, readable_names(interface))
   end
 
-  defp call_getter(getter, _interface_name, property_name, property, _context)
-       when is_function(getter) do
-    reply_type = unmarshal_type(Tree.property_type(property))
-
-    try do
-      getter.(property_name)
-    rescue
-      e ->
-        {:error, "org.freedesktop.DBus.Error.Failed", Exception.message(e)}
-    else
-      {:ok, value} ->
-        {:ok, reply_type, [value]}
-
-      {:error, type, message} ->
-        {:error, type, message}
-
-      {:error, message} ->
-        {:error, "org.freedesktop.DBus.Error.Failed", message}
-
-      value ->
-        {:ok, reply_type, [value]}
-    end
+  defp readable(interface, values) when is_list(values) do
+    names = readable_names(interface)
+    Enum.filter(values, fn {name, _value} -> name in names end)
   end
 
-  defp call_getter(
-         nil,
-         interface_name,
-         property_name,
-         property,
-         %{
-           path: path,
-           router: router
-         } = context
-       )
-       when not is_nil(router) do
-    DBus.Router.Protocol.get_property(router, path, interface_name, property_name, context)
-  rescue
-    _error ->
-      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
-  else
-    :skip ->
-      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
+  defp readable(_interface, _values), do: %{}
 
-    {:error, _, _} = error ->
-      error
-
-    {:ok, value} ->
-      reply_type = unmarshal_type(Tree.property_type(property))
-      {:ok, reply_type, [value]}
-  end
-
-  defp call_getter(_, _, _, _, _) do
-    {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
-  end
-
-  defp call_setter(
-         {:call, pid, method_name},
-         interface_name,
-         property_name,
-         value,
-         property,
-         context
-       ) do
-    setter = fn property_name, value ->
-      GenServer.call(pid, {method_name, property_name, value})
-    end
-
-    call_setter(setter, interface_name, property_name, value, property, context)
-  end
-
-  defp call_setter(setter, _interface_name, property_name, value, property, _context)
-       when is_function(setter) do
-    reply_type = unmarshal_type(Tree.property_type(property))
-
-    try do
-      setter.(property_name, value)
-    rescue
-      e ->
-        {:error, "org.freedesktop.DBus.Error.Failed", Exception.message(e)}
-    else
-      :ok ->
-        {:ok, reply_type, [value]}
-
-      {:ok, value} ->
-        {:ok, reply_type, [value]}
-
-      {:error, type, message} ->
-        {:error, type, message}
-
-      {:error, message} ->
-        {:error, "org.freedesktop.DBus.Error.Failed", message}
-
-      value ->
-        {:ok, reply_type, [value]}
-    end
-  end
-
-  defp call_setter(
-         nil,
-         interface_name,
-         property_name,
-         value,
-         property,
-         %{
-           path: path,
-           router: router
-         } = context
-       )
-       when not is_nil(router) do
-    DBus.Router.Protocol.set_property(
-      router,
-      path,
-      interface_name,
-      property_name,
-      value,
-      context
-    )
-  rescue
-    _error ->
-      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to write property"}
-  else
-    :skip ->
-      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to write property"}
-
-    {:error, _, _} = error ->
-      error
-
-    {:ok, value} ->
-      reply_type = unmarshal_type(Tree.property_type(property))
-      {:ok, reply_type, [value]}
-  end
-
-  defp call_setter(_, _, _, _, _, _) do
-    {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to set property"}
+  defp readable_names(interface) do
+    interface
+    |> Tree.get_properties()
+    |> Enum.filter(&(Tree.property_access(&1) in [:read, :readwrite]))
+    |> Enum.map(&Tree.property_name/1)
   end
 
   defp can_read(property) do
     case Tree.property_access(property) do
       access when access in [:read, :readwrite] ->
-        {:ok, Tree.property_getter(property)}
+        :ok
 
       _ ->
         {:error, "org.freedesktop.DBus.Error.AccessDenied", "The property is not readable"}
@@ -273,15 +212,21 @@ defmodule DBus.Interfaces.Properties do
   defp can_write(property) do
     case Tree.property_access(property) do
       access when access in [:write, :readwrite] ->
-        {:ok, Tree.property_setter(property)}
+        :ok
 
       _ ->
         {:error, "org.freedesktop.DBus.Error.PropertyReadOnly", "The property is read-only"}
     end
   end
 
-  defp unmarshal_type(type) do
-    {:ok, utype} = :dbus_marshaller.unmarshal_signature(type)
+  defp variant({:dbus_variant, _, _} = value, _property), do: value
+
+  defp variant(value, property) do
+    {:dbus_variant, single_type(Tree.property_type(property)), value}
+  end
+
+  defp single_type(type) do
+    {:ok, [utype]} = :dbus_marshaller.unmarshal_signature(type)
     utype
   end
 end
