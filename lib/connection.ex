@@ -1,4 +1,5 @@
 defmodule DBus.Connection do
+  @moduledoc false
   @type dbus_bus_name() :: :system | :session
 
   # def connect(bus_id) do

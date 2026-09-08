@@ -1,4 +1,5 @@
 defmodule DBus.Interfaces.Introspectable do
+  @moduledoc false
   use DBus.Schema
 
   node do

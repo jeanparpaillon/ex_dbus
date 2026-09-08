@@ -1,4 +1,5 @@
 defmodule DBus.Interfaces do
+  @moduledoc false
   use DBus.Schema
   alias DBus.Interfaces.{Introspectable, Peer, Properties}
 

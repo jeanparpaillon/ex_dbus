@@ -1,4 +1,5 @@
 defmodule DBus.Types do
+  @moduledoc false
   @type basic_type ::
           :byte
           | :boolean

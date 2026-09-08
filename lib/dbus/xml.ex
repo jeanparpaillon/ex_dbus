@@ -1,4 +1,5 @@
 defmodule DBus.XML do
+  @moduledoc false
   use DBus.DOM.Spec, prefix: false
   alias DBus.DOM
 

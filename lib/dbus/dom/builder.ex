@@ -1,4 +1,5 @@
 defmodule DBus.DOM.Builder do
+  @moduledoc false
   use DBus.DOM.Spec, prefix: false
 
   @spec service(name()) :: {:ok, service()}

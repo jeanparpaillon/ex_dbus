@@ -1,4 +1,5 @@
 defmodule DBus.Error do
+  @moduledoc false
   import Kernel, except: [defexception: 1]
 
   Kernel.defexception([:type])

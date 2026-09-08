@@ -1,4 +1,5 @@
 defmodule DBus.Schema do
+  @moduledoc false
   alias DBus.Schema.Importing
   alias DBus.DOM.Builder
 

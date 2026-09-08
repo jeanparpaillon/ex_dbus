@@ -1,4 +1,5 @@
 defmodule DBus.DOM.Spec do
+  @moduledoc false
   @type name() :: String.t()
   @type dbus_type() :: any()
   @type dbus_reply_error() :: {:error, binary(), binary()}

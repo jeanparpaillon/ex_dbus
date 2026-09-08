@@ -1,4 +1,5 @@
 defmodule DBus.Interfaces.Peer do
+  @moduledoc false
   use DBus.Schema
 
   node do

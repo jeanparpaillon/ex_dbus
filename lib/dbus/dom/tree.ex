@@ -1,4 +1,5 @@
 defmodule DBus.DOM.Tree do
+  @moduledoc false
   use DBus.DOM.Spec, prefix: false
   alias DBus.DOM.Builder.Finder
   alias DBus.DOM.Tree.Traverse
@@ -68,7 +69,8 @@ defmodule DBus.DOM.Tree do
   def find_child_object({:object, _, _} = parent, [name | paths] = path) do
     case find_child_object(parent, join_path(path)) do
       {:ok, child} ->
-          {:ok, child}
+        {:ok, child}
+
       _ ->
         case find_child_object(parent, name) do
           {:ok, child} -> find_child_object(child, paths)
@@ -109,6 +111,7 @@ defmodule DBus.DOM.Tree do
     case find_object(objects, join_path(path)) do
       {:ok, object} ->
         {:ok, object}
+
       _ ->
         case find_object(objects, name) do
           {:ok, object} ->

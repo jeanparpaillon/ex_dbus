@@ -1,4 +1,5 @@
 defmodule DBus.DOM.XML do
+  @moduledoc false
   use DBus.DOM.Spec, prefix: false
   import Saxy.XML
 

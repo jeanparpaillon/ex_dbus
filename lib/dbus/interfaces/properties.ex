@@ -1,4 +1,5 @@
 defmodule DBus.Interfaces.Properties do
+  @moduledoc false
   use DBus.Schema
   alias DBus.DOM.Tree
 

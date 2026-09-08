@@ -1,4 +1,5 @@
 defmodule DBus.DOM.Builder.Finder do
+  @moduledoc false
   use DBus.DOM.Spec, prefix: false
 
   @spec find_index(service(), name() | object()) :: {index(), object() | nil}

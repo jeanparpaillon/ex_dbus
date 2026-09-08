@@ -1,4 +1,5 @@
 defmodule DBus.DOM.Builder.Insert do
+  @moduledoc false
   use DBus.DOM.Spec, prefix: false
   alias DBus.DOM.Builder.Finder
 
