@@ -1,5 +1,5 @@
 defprotocol DBus.Router.Protocol do
-  alias DBus.Spec
+  alias DBus.DOM.Spec
 
   @fallback_to_any true
 

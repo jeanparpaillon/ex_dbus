@@ -1,5 +1,5 @@
 defmodule DBus.Router do
-  alias DBus.Spec
+  alias DBus.DOM.Spec
 
   @callback method(
               path :: String.t(),
