@@ -395,6 +395,10 @@ defmodule DBus.Service do
     end
   end
 
+  # The only Router.Protocol implementation shipped here is the Any fallback, which
+  # always returns :skip. Dialyzer therefore sees the `result` clause below as dead,
+  # although it is what every consumer-defined router goes through.
+  @dialyzer {:no_match, route_method: 7}
   defp route_method(router, path, interface, method, signature, args, context) do
     Router.Protocol.method(router, path, interface, method, signature, args, context)
   rescue
