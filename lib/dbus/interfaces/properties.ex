@@ -1,3 +1,4 @@
+# credo:disable-for-this-fileCredo.Check.Refactor.Nesting
 defmodule DBus.Interfaces.Properties do
   @moduledoc false
   use DBus.Schema
@@ -158,22 +159,20 @@ defmodule DBus.Interfaces.Properties do
          } = context
        )
        when not is_nil(router) do
-    try do
-      DBus.Router.Protocol.get_property(router, path, interface_name, property_name, context)
-    rescue
-      _error ->
-        {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
-    else
-      :skip ->
-        {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
+    DBus.Router.Protocol.get_property(router, path, interface_name, property_name, context)
+  rescue
+    _error ->
+      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
+  else
+    :skip ->
+      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to read property"}
 
-      {:error, _, _} = error ->
-        error
+    {:error, _, _} = error ->
+      error
 
-      {:ok, value} ->
-        reply_type = unmarshal_type(Tree.property_type(property))
-        {:ok, reply_type, [value]}
-    end
+    {:ok, value} ->
+      reply_type = unmarshal_type(Tree.property_type(property))
+      {:ok, reply_type, [value]}
   end
 
   defp call_getter(_, _, _, _, _) do
@@ -234,29 +233,27 @@ defmodule DBus.Interfaces.Properties do
          } = context
        )
        when not is_nil(router) do
-    try do
-      DBus.Router.Protocol.set_property(
-        router,
-        path,
-        interface_name,
-        property_name,
-        value,
-        context
-      )
-    rescue
-      _error ->
-        {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to write property"}
-    else
-      :skip ->
-        {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to write property"}
+    DBus.Router.Protocol.set_property(
+      router,
+      path,
+      interface_name,
+      property_name,
+      value,
+      context
+    )
+  rescue
+    _error ->
+      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to write property"}
+  else
+    :skip ->
+      {:error, "org.freedesktop.DBus.Error.NotSupported", "Failed to write property"}
 
-      {:error, _, _} = error ->
-        error
+    {:error, _, _} = error ->
+      error
 
-      {:ok, value} ->
-        reply_type = unmarshal_type(Tree.property_type(property))
-        {:ok, reply_type, [value]}
-    end
+    {:ok, value} ->
+      reply_type = unmarshal_type(Tree.property_type(property))
+      {:ok, reply_type, [value]}
   end
 
   defp call_setter(_, _, _, _, _, _) do

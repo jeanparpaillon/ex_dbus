@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Consistency.ExceptionNames
 defmodule DBus.Schema.SchemaException do
   import Kernel, except: [reraise: 2]
 

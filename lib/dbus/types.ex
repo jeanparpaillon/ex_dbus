@@ -15,7 +15,7 @@ defmodule DBus.Types do
   @type array_type(t) :: list(t)
   @type any_type :: basic_type | array_type()
 
-  def valid_types() do
+  def valid_types do
     [
       :byte,
       :boolean,

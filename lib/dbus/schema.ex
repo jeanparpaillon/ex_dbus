@@ -1,7 +1,7 @@
 defmodule DBus.Schema do
   @moduledoc false
-  alias DBus.Schema.Importing
   alias DBus.DOM.Builder
+  alias DBus.Schema.Importing
 
   defmacro __using__(_) do
     module = __CALLER__.module
@@ -27,13 +27,13 @@ defmodule DBus.Schema do
     escaped_root = Macro.escape(root)
 
     quote do
-      def __schema__() do
+      def __schema__ do
         unquote(escaped_root)
       end
     end
   end
 
-  defmacro node() do
+  defmacro node do
     __def_node__(__CALLER__, "")
   end
 

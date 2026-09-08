@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Consistency.ExceptionNames
 defmodule DBus.Error do
   @moduledoc false
   import Kernel, except: [defexception: 1]
@@ -18,7 +19,7 @@ defmodule DBus.Error do
       import Kernel, except: [defexception: 1]
       import DBus.Error, only: [defexception: 1]
 
-      def get_type() do
+      def get_type do
         @error_type
       end
 
