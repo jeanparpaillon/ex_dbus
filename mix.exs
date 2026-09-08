@@ -17,7 +17,11 @@ defmodule DBus.MixProject do
       dialyzer: [
         plt_local_path: "priv/plts",
         plt_core_path: "priv/plts"
-      ]
+      ],
+      name: "ExDBus",
+      source_url: @source_url,
+      homepage_url: @source_url,
+      docs: &docs/0
     ]
   end
 
@@ -41,7 +45,8 @@ defmodule DBus.MixProject do
 
       # Development
       {:dialyxir, "~> 1.4.0", only: [:dev, :test], runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false, warn_if_outdated: true}
     ]
   end
 
@@ -51,6 +56,13 @@ defmodule DBus.MixProject do
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @source_url},
       files: ~w(lib LICENSE.md mix.exs README.md)
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md"]
     ]
   end
 end
