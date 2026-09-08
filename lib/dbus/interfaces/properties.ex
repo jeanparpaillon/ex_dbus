@@ -1,4 +1,4 @@
-# credo:disable-for-this-fileCredo.Check.Refactor.Nesting
+# credo:disable-for-this-file Credo.Check.Refactor.Nesting
 defmodule DBus.Interfaces.Properties do
   @moduledoc false
   use DBus.Schema
