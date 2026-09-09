@@ -1,7 +1,7 @@
 defmodule MyIcon do
   @moduledoc false
 
-  alias :dbus_method_call, as: MethodCall
+  alias DBus.Message
   alias DBus.RPC
   alias MyIcon.Sup
 
@@ -14,13 +14,11 @@ defmodule MyIcon do
 
   def register_icon do
     call =
-      MethodCall.build(
-        "RegisterStatusMotifierItem",
-        "/StatusNotifierWatcher",
-        {[:string], [@service_name]},
-        interface: "org.kde.StatusNotifierWatcher",
-        destination: "org.kde.StatusNotifierWatcher"
-      )
+      "org.kde.StatusNotifierWatcher"
+      |> Message.method_call("RegisterStatusMotifierItem")
+      |> Message.destination("org.kde.StatusNotifierWatcher")
+      |> Message.path("/StatusNotifierWatcher")
+      |> Message.body([:string], [@service_name])
 
     conn = DBus.get_conn(@bus_ref)
     RPC.call(conn, call)

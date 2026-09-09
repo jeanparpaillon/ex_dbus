@@ -1,6 +1,7 @@
 defmodule DBus.Schema do
   @moduledoc false
   alias DBus.DOM.Builder
+  alias DBus.DOM.Spec
   alias DBus.Schema.Importing
 
   defmacro __using__(_) do
@@ -47,6 +48,24 @@ defmodule DBus.Schema do
 
   defmacro node(name, do: block) do
     __def_node__(__CALLER__, name, block)
+  end
+
+  ###
+  ### Helpers
+  ###
+  @spec schema(module()) :: {:ok, Spec.object()} | {:error, :invalid}
+  def schema(mod) when is_atom(mod) do
+    with {:module, _} <- Code.ensure_loaded(mod),
+         true <- function_exported?(mod, :__schema__, 0) do
+      {:ok, mod.__schema__()}
+    else
+      _ ->
+        {:error, :invalid}
+    end
+  end
+
+  def schema(_mod) do
+    {:error, :invalid}
   end
 
   defp __def_node__(_caller, name) do

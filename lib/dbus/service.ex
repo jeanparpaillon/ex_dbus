@@ -340,21 +340,30 @@ defmodule DBus.Service do
   end
 
   defp handle_dbus_method_call(msg, conn, state) do
+    # These go into `exec_dbus_method_call/2`, which matches them against the
+    # schema, so an absent field has to arrive as "" rather than nil. `:signature`
+    # is the header field, the signature as written ("su"); `Message.signature/1`
+    # would return the parsed `body_sig` instead, which is not what
+    # `Finder.get_method_signature/1` is compared against.
     path = Message.find_field(msg, :path, "")
     interface = Message.find_field(msg, :interface, "")
     member = Message.find_field(msg, :member, "")
     signature = Message.find_field(msg, :signature, "")
-    body = Message.get_body(msg)
+    body = Message.body(msg)
 
     reply =
       {path, interface, member, signature, body}
       |> exec_dbus_method_call(state)
       |> case do
         {:ok, types, values} ->
-          :dbus_method_return.build(msg, types, values)
+          msg
+          |> Message.method_return()
+          |> Message.body(types, values)
 
         {:error, name, message} ->
-          :dbus_error.build(msg, name, message)
+          msg
+          |> Message.error(name)
+          |> Message.body([:string], [message])
       end
 
     {:ok, _} = Connection.send(conn, reply)

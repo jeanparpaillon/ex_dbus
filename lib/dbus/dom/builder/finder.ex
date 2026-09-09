@@ -27,6 +27,10 @@ defmodule DBus.DOM.Builder.Finder do
 
   @spec find_index(interface(), name() | object() | member()) ::
           {index(), object() | member() | nil}
+  def find_index({:interface, _name, children}, name) when is_binary(name) do
+    find_by_name(children, name)
+  end
+
   def find_index({:interface, _name, children}, {:object, name, _children}) do
     find_by_name(children, name)
   end
@@ -47,10 +51,10 @@ defmodule DBus.DOM.Builder.Finder do
   end
 
   def find_index(
-        {:interface, _name, children},
-        {:method, _method_name, _children, _handle} = method
+        {:interface, _name, _children} = interface,
+        {:method, _method_name, _method_children, _handle} = method
       ) do
-    find_method(children, method)
+    find_method_index(interface, method)
   end
 
   @spec find_index(member(), argument() | annotation()) ::
@@ -161,6 +165,26 @@ defmodule DBus.DOM.Builder.Finder do
     |> Enum.join("")
   end
 
+  @doc """
+  Signature of a signal body.
+
+  Unlike a method, a signal has no direction: it carries all of its arguments,
+  which the schema records as `:out`.
+  """
+  @spec get_signal_signature(signal()) :: binary()
+  def get_signal_signature({:signal, _, children}) do
+    children
+    |> Enum.reverse()
+    |> Enum.reduce([], fn
+      {:argument, _, type, _direction, _}, acc ->
+        [type | acc]
+
+      _, acc ->
+        acc
+    end)
+    |> Enum.join("")
+  end
+
   @spec find_method(interface(), binary(), {list() | :any, list() | :any}) ::
           :error | {:ok, method()}
   def find_method(interface, method_name, search_signature) do
@@ -198,6 +222,10 @@ defmodule DBus.DOM.Builder.Finder do
   end
 
   defp find_by_name([{:signal, name, _children} = child | _], name, index) do
+    {index, child}
+  end
+
+  defp find_by_name([{:method, name, _children, _handle} = child | _], name, index) do
     {index, child}
   end
 

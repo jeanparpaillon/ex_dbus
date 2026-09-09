@@ -1,5 +1,10 @@
 defmodule DBus.Interfaces.Properties do
-  @moduledoc false
+  @moduledoc """
+  Describe `org.freedesktop.DBus.Properties`
+
+  Callbacks looks like proxy side ones
+  TBD : split proxy / service implementations
+  """
   use DBus.Schema
   alias DBus.DOM.Tree
 

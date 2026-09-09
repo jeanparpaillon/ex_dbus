@@ -1,5 +1,10 @@
 defmodule DBus.Interfaces.Peer do
-  @moduledoc false
+  @moduledoc """
+  Describe standard interface `org.freedesktop.DBus.Peer
+  `
+
+  See [D-Bus Peer Interface](https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-peer)
+  """
   use DBus.Schema
 
   node do

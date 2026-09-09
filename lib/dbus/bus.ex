@@ -11,6 +11,7 @@ defmodule DBus.Bus do
   alias :dbus_pubsub, as: PubSub
   alias DBus.Bus.ServiceMonitor
   alias DBus.Connection
+  alias DBus.Interfaces
   alias DBus.Message
   alias DBus.Proxy
   alias DBus.RPC
@@ -36,12 +37,10 @@ defmodule DBus.Bus do
   end
 
   @path "/org/freedesktop/DBus"
-  @interface "org.freedesktop.DBus"
   @destination "org.freedesktop.DBus"
-  @member_hello "Hello"
+
+  @interface "org.freedesktop.DBus"
   @member_name_acquired "NameAcquired"
-  @member_request_name "RequestName"
-  @member_release_name "ReleaseName"
 
   @spec start_link(term, Connection.connection(), atom) :: {:ok, pid} | {:error, term}
   def start_link(init_arg, conn, ref) do
@@ -53,13 +52,11 @@ defmodule DBus.Bus do
   @spec get_name_owner(GenServer.server(), String.t()) :: {:ok, String.t()} | {:error, any()}
   def get_name_owner(ref, name) do
     call =
-      :dbus_method_call.build(
-        "GetNameOwner",
-        @path,
-        {[:string], [name]},
-        interface: @interface,
-        destination: @destination
-      )
+      Interfaces.Bus
+      |> Message.method_call(@interface, "GetNameOwner")
+      |> Message.path(@path)
+      |> Message.destination(@destination)
+      |> Message.body([name])
 
     Proxy.rpc_call(ref, call)
   end
@@ -90,16 +87,13 @@ defmodule DBus.Bus do
 
   @impl true
   def init(conn, _args) do
-    hello =
-      :dbus_method_call.build(
-        @member_hello,
-        @path,
-        [],
-        interface: @interface,
-        destination: @destination
-      )
-
     {:ok, monitor} = ServiceMonitor.start_link()
+
+    hello =
+      Interfaces.Bus
+      |> Message.method_call(@interface, "Hello")
+      |> Message.path(@path)
+      |> Message.destination(@destination)
 
     case RPC.call(conn, hello) do
       {:ok, name} when is_binary(name) ->
@@ -134,7 +128,7 @@ defmodule DBus.Bus do
 
     case {interface, member} do
       {@interface, @member_name_acquired} ->
-        case Message.get_body(message) do
+        case Message.body(message) do
           ":" <> _ ->
             # Unique name, already processed when saying hello
             {:noreply, state}
@@ -151,17 +145,12 @@ defmodule DBus.Bus do
 
   @impl true
   def handle_call({:register_service, name, opts}, {service, _}, state) do
-    flags = process_request_name_opts(opts, 0)
-    args = {[:string, :uint32], [name, flags]}
-
     request =
-      :dbus_method_call.build(
-        @member_request_name,
-        @path,
-        args,
-        interface: @interface,
-        destination: @destination
-      )
+      Interfaces.Bus
+      |> Message.method_call(@interface, "RequestName")
+      |> Message.path(@path)
+      |> Message.destination(@destination)
+      |> Message.body([name, process_request_name_opts(opts, 0)])
 
     case RPC.call(state.conn, request) do
       {:ok, @request_name_primary_owner} ->
@@ -182,19 +171,12 @@ defmodule DBus.Bus do
   end
 
   def handle_call({:unregister_service, name}, _from, state) do
-    args = {[:string], [name]}
-
     request =
-      :dbus_method_call.build(
-        @member_release_name,
-        @path,
-        args,
-        [
-          {:interface, @interface},
-          {:destination, @destination},
-          :no_reply_expecteds
-        ]
-      )
+      Interfaces.Bus
+      |> Message.method_call(@interface, "ReleaseName")
+      |> Message.path(@path)
+      |> Message.destination(@destination)
+      |> Message.body([name])
 
     case RPC.call(state.conn, request) do
       {:ok, _} ->
@@ -249,7 +231,7 @@ defmodule DBus.Bus do
         {:noreply, state}
 
       destination ->
-        PubSub.publish(destination, {:dbus, Message.get_type(message), message})
+        PubSub.publish(destination, {:dbus, Message.type(message), message})
         {:noreply, state}
     end
   end
