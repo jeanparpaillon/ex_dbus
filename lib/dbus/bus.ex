@@ -17,7 +17,13 @@ defmodule DBus.Bus do
 
   @flag_allow_replacement 1
   @flag_replace_existing 2
-  @flag_do_not_queue 3
+  @flag_do_not_queue 4
+
+  # RequestName reply codes, org.freedesktop.DBus spec
+  @request_name_primary_owner 1
+  @request_name_in_queue 2
+  @request_name_exists 3
+  @request_name_already_owner 4
 
   @type register_option ::
           :allow_replacement
@@ -158,16 +164,16 @@ defmodule DBus.Bus do
       )
 
     case RPC.call(state.conn, request) do
-      {:ok, :primary_owner} ->
+      {:ok, @request_name_primary_owner} ->
         {:reply, :ok, wait_for_acquire(name, service, state)}
 
-      {:ok, :already_owner} ->
+      {:ok, @request_name_already_owner} ->
         {:reply, :ok, state}
 
-      {:ok, :in_queue} ->
+      {:ok, @request_name_in_queue} ->
         {:reply, :ok, wait_for_acquire(name, service, state)}
 
-      {:ok, :exists} ->
+      {:ok, @request_name_exists} ->
         {:reply, {:error, :exists}, state}
 
       {:error, reason} ->

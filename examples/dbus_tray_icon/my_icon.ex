@@ -22,6 +22,7 @@ defmodule MyIcon do
         destination: "org.kde.StatusNotifierWatcher"
       )
 
-    RPC.call(@bus_ref, call)
+    conn = DBus.get_conn(@bus_ref)
+    RPC.call(conn, call)
   end
 end
