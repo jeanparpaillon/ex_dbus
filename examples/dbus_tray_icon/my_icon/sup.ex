@@ -34,9 +34,15 @@ defmodule MyIcon.Sup do
 
     children = [
       {DBus, [bus_ref]},
-      {IconConfig, config: icon_config, name: IconConfig},
-      {MenuConfig, config: menu_config, name: MenuConfig},
-      {MyIcon.Service, name: service_name, icon: IconConfig, menu: MenuConfig, bus: bus_ref}
+      {MyIcon.Config, config: icon_config, name: IconConfig},
+      {MyIcon.Config, config: menu_config, name: MenuConfig},
+      {MyIcon.Service,
+       name: service_name,
+       icon: IconConfig,
+       menu: MenuConfig,
+       bus: bus_ref,
+       schema: DBusTrayIcon.IconSchema,
+       router: %MyIcon.Router{}}
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one)

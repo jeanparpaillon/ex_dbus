@@ -56,14 +56,14 @@ defmodule DBus do
     end
   end
 
-  @spec get_conn(address()) :: GenServer.server() | nil
+  @spec get_conn(address()) :: pid() | nil
   def get_conn(address) do
-    address |> get_children(:dbus_connection)
+    address |> get_child(Connection)
   end
 
-  @spec get_proxy(address()) :: GenServer.server() | nil
+  @spec get_proxy(address()) :: pid() | nil
   def get_proxy(address) do
-    address |> get_children(:dbus_bus)
+    address |> get_child(Bus)
   end
 
   @spec stop(address()) :: :ok
@@ -105,16 +105,16 @@ defmodule DBus do
     address
   end
 
-  @spec get_children(address(), atom()) ::
-          nil
-          | :restarting
-          | pid()
-  defp get_children(address, id) do
+  # Child ids are the child_spec ids of `DBus.Connection` and `DBus.Bus`, as
+  # started by `start_link/2`. Returns nil when the child is restarting or the
+  # supervisor is not running.
+  @spec get_child(address(), atom()) :: pid() | nil
+  defp get_child(address, id) do
     address
     |> sup_ref()
     |> Supervisor.which_children()
-    |> Enum.find(fn
-      {^id, child, _type, _module} -> child
+    |> Enum.find_value(fn
+      {^id, child, _type, _modules} when is_pid(child) -> child
       _ -> nil
     end)
   catch

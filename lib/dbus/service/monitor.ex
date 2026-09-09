@@ -24,8 +24,8 @@ defmodule DBus.Bus.ServiceMonitor do
   end
 
   @impl true
-  def init(bus) do
-    Process.flag(:trap_exit, true)
+  def init([bus]) do
+    _ = Process.flag(:trap_exit, true)
     {:ok, %{bus: bus, services: %{}}}
   end
 

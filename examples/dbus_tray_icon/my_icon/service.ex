@@ -23,7 +23,9 @@ defmodule MyIcon.Service do
     {:reply, {:error, :unknown_request}, state}
   end
 
-  defp can_register(bus) do
+  defp can_register(address) do
+    bus = DBus.get_proxy(address)
+
     with {:ok, _} <- Bus.get_name_owner(bus, "org.kde.StatusNotifierWatcher"),
          {:ok, true} <-
            Bus.has_interface?(

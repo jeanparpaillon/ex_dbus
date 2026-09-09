@@ -26,7 +26,7 @@ defmodule DBus.Bus do
 
   defmodule State do
     @moduledoc false
-    defstruct conn: nil, unique_name: nil, monitor: nil
+    defstruct conn: nil, unique_name: nil, monitor: nil, acquired: []
   end
 
   @path "/org/freedesktop/DBus"

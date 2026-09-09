@@ -7,8 +7,8 @@ defmodule MyIcon.Config do
     name = Keyword.fetch!(opts, :name)
 
     %{
-      id: __MODULE__,
-      start: {GenServer, :start_link, [__MODULE__, config, name: name]},
+      id: name,
+      start: {GenServer, :start_link, [__MODULE__, config, [name: name]]},
       type: :worker,
       restart: :permanent,
       shutdown: 500

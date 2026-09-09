@@ -17,23 +17,25 @@ defmodule DBus.Service do
     quote do
       @behaviour DBus.Service
 
-      @before_compile DBus.Schema
-
       def child_spec(opts) do
-        opts = [
+        service_opts = [
           name: Keyword.get(opts, :name),
+          # A D-Bus address (:session, :system or an address string), resolved to
+          # the `DBus.Bus` proxy at init time: child_spec/1 runs in the process
+          # calling `Supervisor.start_link/2`, where the bus may not exist yet.
           bus: Keyword.fetch!(opts, :bus),
           # Schema based routing is fine for compilation time
-          schema: __MODULE__,
-          # TBD
+          schema: Keyword.get(opts, :schema, __MODULE__),
           # Router based dispatching may be used for dynamic objects
-          router: nil,
-          service: __MODULE__
+          router: Keyword.get(opts, :router),
+          service: __MODULE__,
+          # Everything the caller passed is handed over to `c:init/1`
+          ctx: opts
         ]
 
         %{
           id: __MODULE__,
-          start: {DBus.Service, :start_link, [self(), opts]},
+          start: {DBus.Service, :start_link, [service_opts]},
           type: :worker,
           restart: :permanent,
           shutdown: 500
@@ -64,14 +66,15 @@ defmodule DBus.Service do
 
   @type option ::
           {:name, String.t()}
+          | {:bus, DBus.address()}
           | {:service, module()}
           | {:ctx, term()}
           | {:schema, module()}
           | {:router, any()}
 
-  @spec start_link(pid(), [option()], GenServer.options()) :: GenServer.on_start()
-  def start_link(bus, opts, gen_opts \\ []) when is_pid(bus) do
-    GenServer.start_link(__MODULE__, {bus, opts}, gen_opts)
+  @spec start_link([option()], GenServer.options()) :: GenServer.on_start()
+  def start_link(opts, gen_opts \\ []) when is_list(opts) do
+    GenServer.start_link(__MODULE__, opts, gen_opts)
   end
 
   @spec call(GenServer.server(), term()) :: {:ok, term()} | {:error, any()}
@@ -115,18 +118,29 @@ defmodule DBus.Service do
   ### Callbacks
   ###
   @impl true
-  def init({bus, [_ | _] = opts}) do
+  def init([_ | _] = opts) do
     service = Keyword.fetch!(opts, :service)
     service_name = Keyword.get(opts, :name)
     router = Keyword.get(opts, :router)
+    address = Keyword.fetch!(opts, :bus)
 
     root =
       opts
       |> Keyword.fetch!(:schema)
       |> get_root()
 
-    true = Process.flag(:trap_exit, true)
+    _ = Process.flag(:trap_exit, true)
 
+    case DBus.get_proxy(address) do
+      nil ->
+        {:stop, {:no_bus, address}}
+
+      bus ->
+        do_init(bus, service, service_name, root, router, opts)
+    end
+  end
+
+  defp do_init(bus, service, service_name, root, router, opts) do
     registered_objects =
       :ets.new(:registered_objects, [
         :set,
@@ -152,14 +166,14 @@ defmodule DBus.Service do
             {:ok, state}
 
           {:error, :exists} ->
-            {:error, {:name_exists, service_name}}
+            {:stop, {:name_exists, service_name}}
 
           {:error, reason} ->
-            {:error, reason}
+            {:stop, reason}
         end
 
       {:error, reason} ->
-        {:error, reason}
+        {:stop, reason}
     end
   end
 
@@ -247,12 +261,14 @@ defmodule DBus.Service do
     {:noreply, do_unregister_pid(state, pid)}
   end
 
-  def handle_info({:dbus_method_call, msg, conn} = call, state) do
+  # `DBus.Bus` publishes messages addressed to our name as {:dbus, type, message}
+  def handle_info({:dbus, :method_call, msg}, %State{conn: conn} = state) do
     path = Message.find_field(msg, :path, "")
 
     case do_get_registered_object(state, path) do
       {pid, _ref} ->
-        Process.send_after(pid, call, 0, [])
+        # Registered objects reply themselves: hand them the connection too
+        send(pid, {:dbus_method_call, msg, conn})
         {:noreply, state}
 
       nil ->
@@ -267,8 +283,15 @@ defmodule DBus.Service do
   ###
   ### Private
   ###
-  defp get_root(schema) when is_atom(schema) do
-    schema.__schema__()
+  defp get_root(schema) when is_atom(schema) and not is_nil(schema) do
+    Code.ensure_loaded!(schema)
+
+    if function_exported?(schema, :__schema__, 0) do
+      get_root(schema.__schema__())
+    else
+      raise "Invalid :schema (#{inspect(schema)}): the module must `use DBus.Schema` " <>
+              "and declare a `node do ... end` block"
+    end
   end
 
   defp get_root({:object, _, _} = root) do
